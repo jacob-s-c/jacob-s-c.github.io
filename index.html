@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#1d2421">
   <link rel="icon" href="images/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-  <link rel="preload" href="images/anemones.jpg" as="image">
+  <link rel="preload" href="images/canal.jpg" as="image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
@@ -38,8 +38,8 @@
           <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="22"/></filter>
         </defs>
         <g id="world">
-          <image id="photo" href="images/anemones.jpg" width="2160" height="2880" preserveAspectRatio="none"/>
-          <rect id="dim" width="2160" height="2880"/>
+          <image id="photo" href="images/canal.jpg" width="2880" height="2160" preserveAspectRatio="none"/>
+          <rect id="dim" width="2880" height="2160"/>
           <g id="spots"></g>
         </g>
       </svg>
@@ -48,7 +48,7 @@
       <p class="hint chip" id="hint">Hover over an anemone to say hello</p>
       <div class="found chip" id="found" aria-live="polite">
         <span class="found-dots" id="foundDots"></span>
-        <span id="foundText">0 of 2 found</span>
+        <span id="foundText">0 of 3 found</span>
       </div>
 
       <div id="card" class="card" role="region" aria-live="polite" aria-label="Note">
@@ -104,11 +104,16 @@
     <article data-creature="left">
       <h2>Hi, I'm Jacob.</h2>
       <p>A sentence or two about who you are: what you study and where, and how human health and the planet's health meet in your work.</p>
-      <p>Then what you're working on now, and the path that got you here (schools, labs, programs).</p>
+      <p>Then what you're working on right now.</p>
+    </article>
+    <article data-creature="middle">
+      <h2>Background &amp; interests</h2>
+      <p>The path that got you here (schools, labs, programs) and the topics you keep coming back to.</p>
+      <p>A line about life outside research, like why tide pools, if you like.</p>
     </article>
     <article data-creature="right">
       <h2>Say hello</h2>
-      <p>A line about life outside research, like why tide pools, if you like.</p>
+      <p>The best ways to reach me.</p>
       <p class="links"><a href="mailto:you@example.com">Email</a><a href="https://github.com/jacob-s-c">GitHub</a><a href="#">CV</a></p>
     </article>
   </div>

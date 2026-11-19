@@ -1,23 +1,22 @@
 /* Tide pool about-me page.
  * The photo is shown in an SVG whose coordinates match the original photo
- * (2160 x 2880). Each hotspot below is traced in those coordinates. On hover,
+ * (see PHOTO). Each hotspot below is traced in those coordinates. On hover,
  * a feathered cut-out of that spot lifts off the photo and its note appears.
  * Add ?debug to the URL to see the outlines.
  */
 (() => {
   'use strict';
 
-  // turn: rotate the photo -90deg on screens whose orientation doesn't match it.
-  // Off for this photo, so the two anemones always sit side by side.
-  const PHOTO = { src: 'images/anemones.jpg', w: 2160, h: 2880, turn: false };
+  // turn: rotate the photo a quarter turn on screens whose orientation doesn't match it.
+  // zoom: on wide screens, zoom in so the hotspots fill more of the view.
+  const PHOTO = { src: 'images/canal.jpg', w: 2880, h: 2160, turn: true, zoom: false };
 
   // Hotspots. ellipse: [cx, cy, rx, ry]   poly: [[x, y], ...] (smoothed into a curve)
   // sci is optional; the card shows it (or the common name) in the top-right corner.
   const SPOTS = {
-    'left': { name: 'Sea anemone', sci: '', accent: '#7f9a5a',
-      poly: [[500, 1460], [520, 1400], [560, 1340], [620, 1305], [700, 1288], [760, 1295], [820, 1318], [880, 1335], [932, 1365], [936, 1420], [900, 1455], [830, 1472], [790, 1502], [750, 1540], [690, 1556], [620, 1546], [560, 1516], [515, 1490]] },
-    'right': { name: 'Sea anemone', sci: '', accent: '#5f8f7a',
-      poly: [[1205, 1400], [1215, 1345], [1260, 1310], [1340, 1290], [1400, 1250], [1460, 1225], [1540, 1225], [1572, 1260], [1600, 1300], [1640, 1340], [1686, 1400], [1690, 1450], [1650, 1490], [1600, 1512], [1530, 1532], [1460, 1546], [1400, 1540], [1330, 1520], [1260, 1490], [1215, 1450]] },
+    'left':   { name: 'Sea anemone', sci: '', accent: '#5e8f9a', ellipse: [952, 1429, 168, 146] },
+    'middle': { name: 'Sea anemone', sci: '', accent: '#4f8f78', ellipse: [1428, 1359, 184, 176] },
+    'right':  { name: 'Sea anemone', sci: '', accent: '#7c9a5e', ellipse: [1823, 1506, 186, 148] },
   };
 
   const NS = 'http://www.w3.org/2000/svg';
@@ -119,12 +118,12 @@
     H = scene.clientHeight;
     const rotate = PHOTO.turn !== false && (PHOTO.h > PHOTO.w) !== (H > W);
     const cw = rotate ? PHOTO.h : PHOTO.w, ch = rotate ? PHOTO.w : PHOTO.h;
-    const map = rotate ? ([x, y]) => [y, PHOTO.w - x] : (q) => q;
-    if (rotate) world.setAttribute('transform', `translate(0,${PHOTO.w}) rotate(-90)`);
+    const map = rotate ? ([x, y]) => [PHOTO.h - y, x] : (q) => q; // quarter turn clockwise
+    if (rotate) world.setAttribute('transform', `translate(${PHOTO.h},0) rotate(90)`);
     else world.removeAttribute('transform');
     // shadow falls down-right on screen whichever way the photo is turned
-    svg.style.setProperty('--sx', rotate ? '-40px' : '26px');
-    svg.style.setProperty('--sy', rotate ? '26px' : '40px');
+    svg.style.setProperty('--sx', rotate ? '40px' : '26px');
+    svg.style.setProperty('--sy', rotate ? '-26px' : '40px');
 
     const [ax, ay] = map([allBox[0], allBox[1]]), [bx, by] = map([allBox[2], allBox[3]]);
     const fx = (ax + bx) / 2, fy = (ay + by) / 2;
@@ -134,7 +133,7 @@
     const bw = Math.abs(bx - ax), m = 0.1;
     const fit = W / (bw * (1 + m)); // only narrow screens need this
     // on wide screens, zoom in until the hotspots span ~60% of the width
-    const zoom = Math.max(cover, Math.min(W * 0.6 / bw, (H - headerH()) * 0.6 / Math.abs(by - ay)));
+    const zoom = !PHOTO.zoom ? cover : Math.max(cover, Math.min(W * 0.6 / bw, (H - headerH()) * 0.6 / Math.abs(by - ay)));
     const scale = clamp(fit, cover * 0.85, zoom);
     const vw = W / scale, vh = H / scale, hh = headerH() / scale;
     const x0 = vw >= cw ? (cw - vw) / 2 : clamp(fx - vw / 2, 0, cw - vw);
