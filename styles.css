@@ -59,120 +59,54 @@ a { color: inherit; }
 .tabs a[aria-current="page"] { background: var(--paper); color: var(--ink); }
 .tabs a:focus-visible, .name:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
 
-/* ---------- scene ---------- */
+/* ---------- scene (photo) ---------- */
 .scene {
   position: fixed; inset: 0;
-  transition: filter .7s var(--ease-out), transform .7s var(--ease-out);
+  background: #1d2421;
+  transition: opacity .6s var(--ease-out), transform .7s var(--ease-out);
 }
-.scene > svg, .caustics {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  display: block;
-  pointer-events: none;
+#pool { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.vignette {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(rgba(12, 16, 15, .55), rgba(12, 16, 15, 0) 140px),
+    radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .38) 100%);
 }
-#rock, #floor { will-change: transform; }
-#life .creature { pointer-events: auto; cursor: pointer; outline: none; }
+body[data-view="research"] .scene { opacity: 0; transform: scale(1.03); pointer-events: none; }
 
-body[data-view="research"] .scene {
-  filter: blur(7px) brightness(.5) saturate(.85);
-  transform: scale(1.04);
-  pointer-events: none;
-}
+#photo, #dim { pointer-events: none; }
+#dim { fill: #061418; opacity: 0; transition: opacity .45s; }
+#pool.has-lift #dim { opacity: .45; }
 
-/* caustics: two drifting light-net layers, clipped to the pool by JS */
-.caustics {
-  overflow: hidden;
-  mix-blend-mode: screen;
-  opacity: .3;
-}
-.caustics::before, .caustics::after {
-  content: "";
-  position: absolute; inset: -600px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cfilter id='c' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.0119' numOctaves='2' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.85  0 0 0 0 1  0 0 0 0 0.95  -7 0 0 0 1.3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E");
-  background-size: 420px 420px;
-  animation: drift-a 40s linear infinite;
-}
-.caustics::after {
-  background-size: 588px 588px;
-  opacity: .7;
-  animation: drift-b 55s linear infinite;
-}
-@keyframes drift-a { to { transform: translate3d(420px, 420px, 0); } }
-@keyframes drift-b { to { transform: translate3d(-588px, 588px, 0); } }
+/* each hotspot: shadow, lifted cut-out, pulse outline, hit area.
+   Transforms on these groups scale around the hotspot's center (local 0,0). */
+.spot { cursor: pointer; outline: none; }
+.spot * { pointer-events: none; }
+.spot .hit { pointer-events: all; fill: transparent; }
+.spot:focus-visible .hit { stroke: var(--paper); stroke-width: 2; stroke-dasharray: 6 6; vector-effect: non-scaling-stroke; }
 
-/* ---------- creatures ---------- */
-.creature .lift,
-.creature .shadow-near,
-.creature .shadow-far,
-.creature .pulse,
-.creature .focus-ring {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-.creature .lift { transition: transform .55s cubic-bezier(.2, .9, .25, 1.18); }
-.creature .shadow-near { transform: translate(2px, 3px); transition: opacity .4s, transform .5s var(--ease-out); }
-.creature .shadow-far { transform: translate(3px, 4px); opacity: 0; transition: opacity .45s, transform .55s var(--ease-out); }
-
-.creature.lifted .lift { transform: scale(1.16); }
-.creature.lifted .shadow-near { opacity: 0; transform: translate(5px, 8px); }
-.creature.lifted .shadow-far { opacity: 1; transform: translate(12px, 18px) scale(1.06); }
-
-.creature .hit { fill: transparent; }
-.creature .focus-ring { fill: none; stroke: var(--paper); stroke-width: 2; stroke-dasharray: 4 5; opacity: 0; }
-.creature:focus-visible .focus-ring { opacity: .9; }
-
-.creature .pulse {
-  fill: none; stroke: var(--paper); stroke-width: 1.6;
+.spot .lift {
   opacity: 0;
-  animation: pulse 5.5s ease-out infinite;
-  animation-delay: var(--delay, 0s);
+  transition: transform .5s cubic-bezier(.2, .9, .25, 1.15), opacity 0s linear .5s;
 }
-.creature.found .pulse, .creature.lifted .pulse { animation: none; opacity: 0; }
+.spot.lifted .lift {
+  opacity: 1;
+  transform: scale(1.14);
+  transition: transform .55s cubic-bezier(.2, .9, .25, 1.15), opacity 0s;
+}
+.spot .shadow { opacity: 0; transition: opacity .35s, transform .5s var(--ease-out); }
+.spot.lifted .shadow { opacity: .7; transform: translate(var(--sx), var(--sy)) scale(1.1); }
+
+.pulse-line { fill: none; stroke: var(--paper); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.spot .pulse { opacity: 0; animation: pulse 6s ease-out infinite; }
+.spot.found .pulse, .spot.lifted .pulse { animation: none; opacity: 0; }
 @keyframes pulse {
-  0% { opacity: 0; transform: scale(.85); }
-  8% { opacity: .55; }
-  40% { opacity: 0; transform: scale(1.45); }
-  100% { opacity: 0; transform: scale(1.45); }
+  0% { opacity: 0; transform: scale(.94); }
+  8% { opacity: .7; }
+  35% { opacity: 0; transform: scale(1.16); }
+  100% { opacity: 0; transform: scale(1.16); }
 }
-
-/* idle life */
-.sway { transform-box: fill-box; transform-origin: center; animation: sway 5.5s ease-in-out infinite alternate; }
-.sway.b { animation-duration: 4.2s; animation-delay: -1.3s; animation-direction: alternate-reverse; }
-.sway.c { animation-duration: 6.6s; animation-delay: -2.4s; }
-@keyframes sway { from { transform: rotate(-3.5deg) scale(.985); } to { transform: rotate(3.5deg) scale(1.015); } }
-
-.spines { transform-box: fill-box; transform-origin: center; transition: transform .5s cubic-bezier(.2, .9, .25, 1.3); }
-.creature.lifted .spines { transform: scale(1.08); }
-
-.antenna { transform-box: fill-box; transform-origin: 100% 50%; animation: antenna 2.6s ease-in-out infinite alternate; }
-.antenna.b { animation-duration: 2.1s; animation-delay: -.7s; }
-@keyframes antenna { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
-
-.crab-body { animation: shuffle 9s ease-in-out infinite; }
-@keyframes shuffle {
-  0%, 84%, 100% { transform: translate(0, 0); }
-  88% { transform: translate(-3px, 0); }
-  92% { transform: translate(-1px, 0); }
-  95% { transform: translate(-4px, 0); }
-}
-.creature.lifted .crab-body { animation-duration: 1.8s; }
-
-.cerata { transform-box: fill-box; transform-origin: center; animation: breathe 3.8s ease-in-out infinite alternate; }
-@keyframes breathe { from { transform: scaleY(.94); } to { transform: scaleY(1.05); } }
-
-.grass { animation: sway-grass 6s ease-in-out infinite alternate; }
-@keyframes sway-grass { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
-
-.ripple {
-  fill: none; stroke: #e9fbf4; stroke-width: 1.4;
-  transform-box: fill-box; transform-origin: center;
-  animation: ripple 1.5s ease-out forwards;
-}
-.ripple.big { stroke-width: 2; animation-duration: 1.9s; }
-@keyframes ripple {
-  from { opacity: .55; transform: scale(.15); }
-  to { opacity: 0; transform: scale(1); }
-}
+#pool.debug .hit { stroke: #ff0; stroke-width: 2; vector-effect: non-scaling-stroke; }
 
 /* ---------- chips ---------- */
 .chip {
@@ -263,6 +197,14 @@ body[data-view="research"] .chip { opacity: 0; }
 }
 
 /* ---------- research ---------- */
+.research-bg {
+  position: fixed; inset: -24px;
+  background: url("images/anemones.jpg") center / cover no-repeat;
+  filter: blur(5px) brightness(.38) saturate(.9);
+  opacity: 0;
+  transition: opacity .6s;
+}
+body[data-view="research"] .research-bg { opacity: 1; }
 .research {
   position: fixed; inset: 0; z-index: 10;
   overflow-y: auto;
@@ -346,3 +288,6 @@ body[data-view="research"] .research {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
 }
+
+.card-no { flex-shrink: 0; white-space: nowrap; }
+#pool.has-lift .spot:not(.lifted) .pulse { animation-play-state: paused; opacity: 0; }
