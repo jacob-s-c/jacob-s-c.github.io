@@ -84,7 +84,7 @@ body[data-view="research"] .scene { opacity: 0; transform: scale(1.03); pointer-
 #dim { fill: #061418; opacity: 0; transition: opacity .45s; }
 #pool.has-lift #dim { opacity: .45; }
 
-/* each hotspot: shadow, lifted cut-out, pulse outline, hit area.
+/* each hotspot: shadow, lifted cut-out, glisten, hit area.
    Transforms on these groups scale around the hotspot's center (local 0,0). */
 .spot { cursor: pointer; outline: none; }
 .spot * { pointer-events: none; }
@@ -103,15 +103,24 @@ body[data-view="research"] .scene { opacity: 0; transform: scale(1.03); pointer-
 .spot .shadow { opacity: 0; transition: opacity .35s, transform .5s var(--ease-out); }
 .spot.lifted .shadow { opacity: .7; transform: translate(var(--sx), var(--sy)) scale(1.1); }
 
-.pulse-line { fill: none; stroke: var(--paper); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
-.spot .pulse { opacity: 0; animation: pulse 6s ease-out infinite; }
-.spot.found .pulse, .spot.lifted .pulse { animation: none; opacity: 0; }
-@keyframes pulse {
-  0% { opacity: 0; transform: scale(.94); }
-  8% { opacity: .7; }
-  35% { opacity: 0; transform: scale(1.16); }
-  100% { opacity: 0; transform: scale(1.16); }
+/* glisten: light sweeping across each creature + twinkling sparkles */
+.glint, .sparkles { transition: opacity .3s; }
+.glint { mix-blend-mode: screen; }
+.sweep { animation: sweep 4.5s ease-in-out infinite; }
+@keyframes sweep {
+  0% { transform: translateX(0); }
+  40%, 100% { transform: translateX(var(--dist)); }
 }
+.spark { fill: #fffdf6; }
+.spark-glow { fill: #fff; opacity: .75; }
+.twinkle { opacity: 0; animation: twinkle 3.6s ease-in-out infinite; }
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(.2) rotate(0deg); }
+  12% { opacity: 1; transform: scale(1) rotate(25deg); }
+  20% { opacity: 1; transform: scale(.9) rotate(38deg); }
+  32% { opacity: 0; transform: scale(.25) rotate(55deg); }
+}
+#pool.has-lift .glint, #pool.has-lift .sparkles { opacity: 0; }
 #pool.debug .hit { stroke: #ff0; stroke-width: 2; vector-effect: non-scaling-stroke; }
 
 /* ---------- chips ---------- */
@@ -299,4 +308,3 @@ body[data-view="research"] .research {
 }
 
 .card-no { flex-shrink: 0; white-space: nowrap; }
-#pool.has-lift .spot:not(.lifted) .pulse { animation-play-state: paused; opacity: 0; }

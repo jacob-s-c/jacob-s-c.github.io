@@ -33,6 +33,14 @@
     return e;
   }
   const r1 = (n) => Math.round(n * 10) / 10;
+  function seeded(seed) {
+    return () => {
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
   function smoothClosed(pts) {
@@ -71,7 +79,21 @@
     el('path', { d, fill: '#000', filter: 'url(#softShadow)', transform: back }, el('g', { class: 'shadow' }, at));
     const lift = el('g', { class: 'lift' }, at);
     el('image', { href: PHOTO.src, width: PHOTO.w, height: PHOTO.h, preserveAspectRatio: 'none' }, el('g', { transform: back, mask: `url(#m-${key})` }, lift));
-    el('path', { d, class: 'pulse-line', transform: back }, el('g', { class: 'pulse', style: `animation-delay:${(index * 0.8).toFixed(1)}s` }, at));
+
+    // glisten: a soft band of light sweeps across the creature, plus a few twinkles
+    const bw = box[2] - box[0], bh = box[3] - box[1], band = Math.max(bw, bh) * 0.42;
+    const glint = el('g', { class: 'glint', transform: back, mask: `url(#m-${key})` }, at);
+    const sweep = el('g', { class: 'sweep', style: `--dist:${r1(bw + band * 3)}px;animation-delay:${(index * 1.4).toFixed(1)}s` }, glint);
+    el('rect', { x: r1(box[0] - band * 2), y: r1(box[1] - bh * 0.5), width: r1(band), height: r1(bh * 2), fill: 'url(#glintGrad)', transform: `rotate(18 ${r1(box[0] - band * 1.5)} ${r1(cy)})` }, sweep);
+    const rand = seeded(index * 977 + 13);
+    const sparkles = el('g', { class: 'sparkles', transform: back }, at);
+    for (let i = 0; i < 4; i++) {
+      const a = rand() * Math.PI * 2, k = Math.sqrt(rand()) * 0.34;
+      const sp = el('g', { transform: `translate(${r1(cx + Math.cos(a) * bw * k)},${r1(cy + Math.sin(a) * bh * k)})` }, sparkles);
+      const tw = el('g', { class: 'twinkle', style: `animation-delay:${(rand() * 4).toFixed(2)}s;animation-duration:${(2.4 + rand() * 1.4).toFixed(2)}s` }, el('g', { class: 'spark-size' }, sp));
+      el('circle', { r: 4.5, class: 'spark-glow', filter: 'url(#sparkGlow)' }, tw);
+      el('path', { d: 'M0,-10C1,-2 2,-1 10,0C2,1 1,2 0,10C-1,2 -2,1 -10,0C-2,-1 -1,-2 0,-10Z', class: 'spark' }, tw);
+    }
     const hit = el('path', { d, class: 'hit' }, g);
 
     spots.push({ key, data, article, index, g, hit, box });
@@ -116,6 +138,8 @@
     const x0 = vw >= cw ? (cw - vw) / 2 : clamp(fx - vw / 2, 0, cw - vw);
     const y0 = vh >= ch ? ch / 2 - (vh + hh) / 2 : clamp(fy - (vh + hh) / 2, 0, ch - vh);
     svg.setAttribute('viewBox', `${r1(x0)} ${r1(y0)} ${r1(vw)} ${r1(vh)}`);
+    const k = (W <= 640 ? 11 : 15) / (10 * scale); // sparkle radius in screen px
+    svg.querySelectorAll('.spark-size').forEach((g) => g.setAttribute('transform', `scale(${k.toFixed(3)})`));
     if (current) placeCard(current);
   }
 
