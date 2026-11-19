@@ -9,7 +9,7 @@
 
   // turn: rotate the photo -90deg on screens whose orientation doesn't match it.
   // Off for this photo, so the two anemones always sit side by side.
-  const PHOTO = { src: 'images/tidepool.jpg', w: 2160, h: 2880, turn: false };
+  const PHOTO = { src: 'images/anemones.jpg', w: 2160, h: 2880, turn: false };
 
   // Hotspots. ellipse: [cx, cy, rx, ry]   poly: [[x, y], ...] (smoothed into a curve)
   // sci is optional; the card shows it (or the common name) in the top-right corner.

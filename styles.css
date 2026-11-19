@@ -76,7 +76,7 @@ a { color: inherit; }
 .scene::before {
   /* blurred backdrop, only visible if the photo has to shrink to fit a hotspot */
   content: ""; position: absolute; inset: -30px;
-  background: url("images/tidepool.jpg") center / cover no-repeat;
+  background: url("images/anemones.jpg") center / cover no-repeat;
   filter: blur(14px) brightness(.55);
 }
 .vignette {
@@ -224,7 +224,7 @@ body[data-view="research"] .chip { opacity: 0; }
 .research-bg {
   position: fixed; inset: -24px;
   pointer-events: none;
-  background: url("images/tidepool.jpg") center / cover no-repeat;
+  background: url("images/anemones.jpg") center / cover no-repeat;
   filter: blur(10px) brightness(.35) saturate(.9);
   opacity: 0;
   transition: opacity .6s;
