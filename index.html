@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Jacob Chen</title>
+  <meta name="description" content="Jacob Chen — about me and research.">
+  <meta name="theme-color" content="#2a2622">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script>document.documentElement.classList.replace('no-js', 'js');</script>
+</head>
+<body data-view="about">
+
+  <header class="topbar">
+    <a class="name" href="#about">Jacob Chen</a>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#about" data-tab="about" aria-current="page">About</a>
+      <a href="#research" data-tab="research">Research</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ABOUT: the tide pool. Drawn by main.js. -->
+    <section id="scene" class="scene" aria-label="About me: a tide pool. Each creature holds a note.">
+      <svg id="rock" aria-hidden="true">
+        <defs>
+          <filter id="rockF" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.0032 0.0048" numOctaves="6" seed="11" result="noise"/>
+            <feDiffuseLighting in="noise" surfaceScale="28" diffuseConstant="1.2" lighting-color="#fff" result="lit">
+              <feDistantLight azimuth="225" elevation="48"/>
+            </feDiffuseLighting>
+            <feComposite in="lit" in2="SourceGraphic" operator="arithmetic" k1="1.2" result="shaded"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="1" seed="4" result="grain"/>
+            <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0.9  0 0 0 0 0.88  0 0 0 0 0.84  14 0 0 0 -10.2" result="light"/>
+            <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0.14  0 0 0 0 0.12  0 0 0 0 0.11  0 -16 0 0 4.4" result="dark"/>
+            <feMerge><feMergeNode in="shaded"/><feMergeNode in="light"/><feMergeNode in="dark"/></feMerge>
+          </filter>
+          <filter id="blobBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="70"/></filter>
+        </defs>
+        <g filter="url(#rockF)">
+          <rect width="100%" height="100%" fill="#9a8f84"/>
+          <g filter="url(#blobBlur)">
+            <ellipse cx="12%" cy="18%" rx="22%" ry="20%" fill="#8f9479"/>
+            <ellipse cx="88%" cy="80%" rx="24%" ry="22%" fill="#8c8d73"/>
+            <ellipse cx="85%" cy="12%" rx="18%" ry="16%" fill="#b3a28c"/>
+            <ellipse cx="8%" cy="88%" rx="20%" ry="18%" fill="#8a7f76"/>
+            <ellipse cx="50%" cy="98%" rx="30%" ry="10%" fill="#9a8e82"/>
+          </g>
+        </g>
+      </svg>
+
+      <svg id="floor" aria-hidden="true"></svg>
+      <div id="caustics" class="caustics" aria-hidden="true"></div>
+
+      <svg id="life">
+        <defs>
+          <filter id="shNear" x="-30%" y="-30%" width="160%" height="160%">
+            <feColorMatrix type="matrix" values="0 0 0 0 0.01  0 0 0 0 0.08  0 0 0 0 0.1  0 0 0 0.55 0"/>
+            <feGaussianBlur stdDeviation="1.6"/>
+          </filter>
+          <filter id="shFar" x="-40%" y="-40%" width="180%" height="180%">
+            <feColorMatrix type="matrix" values="0 0 0 0 0.01  0 0 0 0 0.07  0 0 0 0 0.09  0 0 0 0.42 0"/>
+            <feGaussianBlur stdDeviation="5"/>
+          </filter>
+          <radialGradient id="g-star" r="55%">
+            <stop offset="0" stop-color="#b070bd"/><stop offset=".45" stop-color="#7f3f8e"/><stop offset="1" stop-color="#55215f"/>
+          </radialGradient>
+          <radialGradient id="g-anem" r="50%">
+            <stop offset="0" stop-color="#7cc8a0"/><stop offset="1" stop-color="#3f8a66"/>
+          </radialGradient>
+          <radialGradient id="g-shell" cx="60%" cy="45%" r="60%">
+            <stop offset="0" stop-color="#6c615d"/><stop offset=".6" stop-color="#3c3432"/><stop offset="1" stop-color="#231e1d"/>
+          </radialGradient>
+          <linearGradient id="g-nudi" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#5f33a6"/><stop offset=".5" stop-color="#9468dc"/><stop offset="1" stop-color="#5f33a6"/>
+          </linearGradient>
+          <linearGradient id="g-mussel" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#3a5170"/><stop offset=".45" stop-color="#18222f"/><stop offset="1" stop-color="#0b1018"/>
+          </linearGradient>
+          <linearGradient id="g-sheen" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+          </linearGradient>
+          <clipPath id="lifeClip"><path id="lifeClipPath"/></clipPath>
+        </defs>
+        <g id="fishLayer" aria-hidden="true"></g>
+        <g id="creatureLayer"></g>
+        <g id="rippleLayer" clip-path="url(#lifeClip)" aria-hidden="true"></g>
+        <path id="sheen" fill="url(#g-sheen)" aria-hidden="true"/>
+      </svg>
+
+      <p class="hint chip" id="hint">Hover over a creature to say hello</p>
+      <div class="found chip" id="found" aria-live="polite">
+        <span class="found-dots" id="foundDots"></span>
+        <span id="foundText">0 of 6 found</span>
+      </div>
+
+      <div id="card" class="card" role="region" aria-live="polite" aria-label="Note">
+        <div class="card-meta"><span class="card-no"></span><span class="card-sci"></span></div>
+        <div class="card-body"></div>
+      </div>
+    </section>
+
+    <!-- RESEARCH -->
+    <section id="research" class="research" aria-labelledby="research-title">
+      <div class="research-inner">
+        <h1 id="research-title">Research</h1>
+        <p class="lede">A sentence on the thread that ties your work together: the organisms, systems or questions you care about.</p>
+
+        <div class="specimens">
+          <article class="specimen" style="--accent:#3d9a6c">
+            <div class="specimen-top"><span>No. 001</span><span>2025 – present</span></div>
+            <h2>Your project title</h2>
+            <p class="specimen-where">Lab or field site · Your role</p>
+            <p>One or two sentences: the question, the organism or system, and what you found or are building.</p>
+            <div class="specimen-links"><a href="#">Paper</a><a href="#">Poster</a></div>
+          </article>
+
+          <article class="specimen" style="--accent:#8d4b9c">
+            <div class="specimen-top"><span>No. 002</span><span>2024</span></div>
+            <h2>A second project with a slightly longer title</h2>
+            <p class="specimen-where">Collaborators or venue · Your role</p>
+            <p>Keep each summary short. A visitor should get the gist from the label alone.</p>
+            <div class="specimen-links"><a href="#">Paper</a><a href="#">Code</a></div>
+          </article>
+
+          <article class="specimen" style="--accent:#c4513a">
+            <div class="specimen-top"><span>No. 003</span><span>2023</span></div>
+            <h2>Earlier work</h2>
+            <p class="specimen-where">Program or institution</p>
+            <p>Undergrad thesis, a summer field season, a class project you're proud of.</p>
+            <div class="specimen-links"><a href="#">Slides</a></div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!--
+    ABOUT-ME NOTES
+    Each <article> is revealed by the creature named in data-creature.
+    Edit the text freely; keep the data-creature values as they are.
+    Order here = the numbering on the cards (and keyboard tab order).
+  -->
+  <div id="notes" class="notes">
+    <article data-creature="star">
+      <h2>Hi, I'm Jacob.</h2>
+      <p>A sentence or two about who you are: what you study, where, and what pulls you toward the ocean.</p>
+    </article>
+    <article data-creature="anemone">
+      <h2>What I'm working on</h2>
+      <p>Your current role or project. Where you are now and the question that's keeping you busy.</p>
+    </article>
+    <article data-creature="crab">
+      <h2>Where I've been</h2>
+      <p>The path that got you here: schools, labs, field stations, places you've lived. Hermit crabs move house too.</p>
+    </article>
+    <article data-creature="urchin">
+      <h2>What I'm curious about</h2>
+      <p>Topics you keep coming back to, e.g. intertidal ecology, climate resilience, invertebrate physiology.</p>
+    </article>
+    <article data-creature="nudi">
+      <h2>Off the clock</h2>
+      <p>What you do outside of research: diving, photography, cooking, whatever's true.</p>
+    </article>
+    <article data-creature="mussels">
+      <h2>Say hello</h2>
+      <p>I hang on to every message.</p>
+      <p class="links"><a href="mailto:you@example.com">Email</a><a href="https://github.com/jacob-s-c">GitHub</a><a href="#">CV</a></p>
+    </article>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
