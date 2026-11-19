@@ -7,17 +7,17 @@
 (() => {
   'use strict';
 
-  const PHOTO = { src: 'images/tidepool.jpg', w: 2160, h: 2880 };
+  // turn: rotate the photo -90deg on screens whose orientation doesn't match it.
+  // Off for this photo, so the two anemones always sit side by side.
+  const PHOTO = { src: 'images/tidepool.jpg', w: 2160, h: 2880, turn: false };
 
   // Hotspots. ellipse: [cx, cy, rx, ry]   poly: [[x, y], ...] (smoothed into a curve)
   // sci is optional; the card shows it (or the common name) in the top-right corner.
   const SPOTS = {
-    'coral': { name: 'Purple coral', sci: '', accent: '#9a7bb8',
-      poly: [[876, 1766], [888, 1670], [930, 1598], [984, 1550], [990, 1454], [1038, 1406], [1110, 1412], [1146, 1460], [1218, 1508], [1314, 1508], [1398, 1538], [1458, 1610], [1494, 1706], [1524, 1826], [1530, 1946], [1506, 2042], [1434, 2078], [1350, 2090], [1254, 2114], [1170, 2120], [1110, 2078], [1026, 2030], [954, 1946], [900, 1850]] },
-    'urchin': { name: 'Sea urchin', sci: '', accent: '#9c5a4a',
-      poly: [[27, 1600], [60, 1520], [100, 1500], [160, 1513], [207, 1473], [220, 1507], [307, 1540], [347, 1667], [393, 1713], [347, 1773], [340, 1820], [267, 1853], [200, 1867], [160, 1880], [100, 1827], [40, 1800], [20, 1720]] },
-    'seaweed': { name: 'Spiky brown seaweed', sci: '', accent: '#a8963a',
-      poly: [[243, 283], [290, 209], [355, 162], [430, 171], [514, 227], [551, 293], [589, 358], [570, 442], [505, 489], [430, 498], [355, 470], [299, 423], [253, 358]] },
+    'left': { name: 'Sea anemone', sci: '', accent: '#7f9a5a',
+      poly: [[500, 1460], [520, 1400], [560, 1340], [620, 1305], [700, 1288], [760, 1295], [820, 1318], [880, 1335], [932, 1365], [936, 1420], [900, 1455], [830, 1472], [790, 1502], [750, 1540], [690, 1556], [620, 1546], [560, 1516], [515, 1490]] },
+    'right': { name: 'Sea anemone', sci: '', accent: '#5f8f7a',
+      poly: [[1205, 1400], [1215, 1345], [1260, 1310], [1340, 1290], [1400, 1250], [1460, 1225], [1540, 1225], [1572, 1260], [1600, 1300], [1640, 1340], [1686, 1400], [1690, 1450], [1650, 1490], [1600, 1512], [1530, 1532], [1460, 1546], [1400, 1540], [1330, 1520], [1260, 1490], [1215, 1450]] },
   };
 
   const NS = 'http://www.w3.org/2000/svg';
@@ -117,7 +117,7 @@
   function layout() {
     W = scene.clientWidth;
     H = scene.clientHeight;
-    const rotate = (PHOTO.h > PHOTO.w) !== (H > W);
+    const rotate = PHOTO.turn !== false && (PHOTO.h > PHOTO.w) !== (H > W);
     const cw = rotate ? PHOTO.h : PHOTO.w, ch = rotate ? PHOTO.w : PHOTO.h;
     const map = rotate ? ([x, y]) => [y, PHOTO.w - x] : (q) => q;
     if (rotate) world.setAttribute('transform', `translate(0,${PHOTO.w}) rotate(-90)`);
@@ -133,7 +133,9 @@
     const cover = Math.max(W / cw, H / ch);
     const bw = Math.abs(bx - ax), m = 0.1;
     const fit = W / (bw * (1 + m)); // only narrow screens need this
-    const scale = clamp(fit, cover * 0.85, cover);
+    // on wide screens, zoom in until the hotspots span ~60% of the width
+    const zoom = Math.max(cover, Math.min(W * 0.6 / bw, (H - headerH()) * 0.6 / Math.abs(by - ay)));
+    const scale = clamp(fit, cover * 0.85, zoom);
     const vw = W / scale, vh = H / scale, hh = headerH() / scale;
     const x0 = vw >= cw ? (cw - vw) / 2 : clamp(fx - vw / 2, 0, cw - vw);
     const y0 = vh >= ch ? ch / 2 - (vh + hh) / 2 : clamp(fy - (vh + hh) / 2, 0, ch - vh);
@@ -148,24 +150,28 @@
   const found = new Set();
 
   function placeCard(s) {
-    const rect = s.hit.getBoundingClientRect();
+    const r = s.hit.getBoundingClientRect(), ex = r.width * 0.08, ey = r.height * 0.08; // room for the lift
+    const rect = { left: r.left - ex, right: r.right + ex, top: r.top - ey, bottom: r.bottom + ey, width: r.width + 2 * ex, height: r.height + 2 * ey };
     if (W <= 640) {
       card.classList.toggle('at-top', rect.top + rect.height / 2 > H * 0.55);
       return;
     }
-    const cw = card.offsetWidth, ch = card.offsetHeight, gap = 20, need = cw + gap + 16;
+    const cw = card.offsetWidth, ch = card.offsetHeight, gap = 20, pad = 16, top = headerH() + 8;
     const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-    const roomRight = W - rect.right, roomLeft = rect.left;
-    let x, origin;
-    if ((cx > W / 2 && roomRight >= need) || (roomLeft < need && roomRight >= need)) {
-      x = rect.right + gap; origin = 'left center';
-    } else if (roomLeft >= need) {
-      x = rect.left - gap - cw; origin = 'right center';
-    } else {
-      x = clamp(cx - cw / 2, 16, W - cw - 16); origin = 'center top';
-    }
-    let y = origin === 'center top' ? rect.bottom + 12 : cy - ch / 2;
-    y = clamp(y, headerH() + 8, H - ch - 16);
+    const avoid = [rect, ...spots.filter((o) => o !== s).map((o) => o.hit.getBoundingClientRect())];
+    const fitX = (x) => clamp(x, pad, W - cw - pad), fitY = (y) => clamp(y, top, H - ch - pad);
+    // candidates: the side away from the middle, the other side, below, above
+    const tries = [
+      ['left center', fitX(rect.right + gap), fitY(cy - ch / 2)],
+      ['right center', fitX(rect.left - gap - cw), fitY(cy - ch / 2)],
+      ['center top', fitX(cx - cw / 2), fitY(rect.bottom + gap)],
+      ['center bottom', fitX(cx - cw / 2), fitY(rect.top - gap - ch)],
+    ];
+    if (cx <= W / 2) tries.unshift(tries.splice(1, 1)[0]);
+    // pick the one that covers the least of any hotspot (ties keep the order above)
+    const cover = ([, x, y]) => avoid.reduce((a, o) =>
+      a + Math.max(0, Math.min(x + cw, o.right) - Math.max(x, o.left)) * Math.max(0, Math.min(y + ch, o.bottom) - Math.max(y, o.top)), 0);
+    const [origin, x, y] = tries.reduce((best, t) => (cover(t) < cover(best) - 1 ? t : best));
     card.style.left = `${Math.round(x)}px`;
     card.style.top = `${Math.round(y)}px`;
     card.style.transformOrigin = origin;
@@ -248,7 +254,7 @@
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 100); });
   window.addEventListener('hashchange', setView);
 
-  if (noHover) $('hint').textContent = 'Tap a creature to say hello';
+  if (noHover) $('hint').textContent = 'Tap an anemone to say hello';
   const params = new URLSearchParams(location.search);
   if (params.has('debug')) svg.classList.add('debug');
   layout();

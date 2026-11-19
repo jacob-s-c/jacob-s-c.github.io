@@ -18,7 +18,7 @@
 <body data-view="about">
 
   <header class="topbar">
-    <a class="name" href="#about">Jacob Chen</a>
+    <a class="name" href="#about">Jacob Chen<span class="tagline">Human &amp; planetary health</span></a>
     <nav class="tabs" aria-label="Sections">
       <a href="#about" data-tab="about" aria-current="page">About</a>
       <a href="#research" data-tab="research">Research</a>
@@ -27,7 +27,7 @@
 
   <main>
     <!-- ABOUT: the tide pool photo. Hotspots are defined in main.js (SPOTS). -->
-    <section id="scene" class="scene" aria-label="About me: a tide pool photo. Each creature holds a note.">
+    <section id="scene" class="scene" aria-label="About me: a tide pool photo. Each anemone holds a note.">
       <svg id="pool" preserveAspectRatio="xMidYMid slice">
         <defs id="poolDefs">
           <filter id="feather" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="9"/></filter>
@@ -45,10 +45,10 @@
       </svg>
       <div class="vignette" aria-hidden="true"></div>
 
-      <p class="hint chip" id="hint">Hover over a creature to say hello</p>
+      <p class="hint chip" id="hint">Hover over an anemone to say hello</p>
       <div class="found chip" id="found" aria-live="polite">
         <span class="found-dots" id="foundDots"></span>
-        <span id="foundText">0 of 3 found</span>
+        <span id="foundText">0 of 2 found</span>
       </div>
 
       <div id="card" class="card" role="region" aria-live="polite" aria-label="Note">
@@ -62,14 +62,14 @@
     <section id="research" class="research" aria-labelledby="research-title">
       <div class="research-inner">
         <h1 id="research-title">Research</h1>
-        <p class="lede">A sentence on the thread that ties your work together: the organisms, systems or questions you care about.</p>
+        <p class="lede">A sentence on the thread that ties your work together: how the health of people and the health of the planet connect in the questions you study.</p>
 
         <div class="specimens">
           <article class="specimen" style="--accent:#4f8f78">
             <div class="specimen-top"><span>No. 001</span><span>2025 – present</span></div>
             <h2>Your project title</h2>
-            <p class="specimen-where">Lab or field site · Your role</p>
-            <p>One or two sentences: the question, the organism or system, and what you found or are building.</p>
+            <p class="specimen-where">Lab, group or partner · Your role</p>
+            <p>One or two sentences: the question, the population or system, and what you found or are building.</p>
             <div class="specimen-links"><a href="#">Paper</a><a href="#">Poster</a></div>
           </article>
 
@@ -85,7 +85,7 @@
             <div class="specimen-top"><span>No. 003</span><span>2023</span></div>
             <h2>Earlier work</h2>
             <p class="specimen-where">Program or institution</p>
-            <p>Undergrad thesis, a summer field season, a class project you're proud of.</p>
+            <p>Undergrad thesis, a summer project, a class project you're proud of.</p>
             <div class="specimen-links"><a href="#">Slides</a></div>
           </article>
         </div>
@@ -101,19 +101,14 @@
     Order here = the numbering on the cards (and keyboard tab order).
   -->
   <div id="notes" class="notes">
-    <article data-creature="coral">
+    <article data-creature="left">
       <h2>Hi, I'm Jacob.</h2>
-      <p>A sentence or two about who you are: what you study, where, and what pulls you toward the ocean.</p>
-      <p>Then what you're working on right now.</p>
+      <p>A sentence or two about who you are: what you study and where, and how human health and the planet's health meet in your work.</p>
+      <p>Then what you're working on now, and the path that got you here (schools, labs, programs).</p>
     </article>
-    <article data-creature="urchin">
-      <h2>Background &amp; interests</h2>
-      <p>The path that got you here (schools, labs, field stations) and the topics you keep coming back to.</p>
-      <p>A line about life outside research, if you like.</p>
-    </article>
-    <article data-creature="seaweed">
+    <article data-creature="right">
       <h2>Say hello</h2>
-      <p>The best ways to reach me.</p>
+      <p>A line about life outside research, like why tide pools, if you like.</p>
       <p class="links"><a href="mailto:you@example.com">Email</a><a href="https://github.com/jacob-s-c">GitHub</a><a href="#">CV</a></p>
     </article>
   </div>

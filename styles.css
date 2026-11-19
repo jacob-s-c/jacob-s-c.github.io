@@ -38,6 +38,13 @@ a { color: inherit; }
   letter-spacing: -.01em;
   text-decoration: none;
   text-shadow: 0 1px 8px rgba(0, 0, 0, .45);
+  display: flex; flex-direction: column; line-height: 1.15;
+}
+.tagline {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-weight: 400; font-size: 11.5px; letter-spacing: .03em;
+  color: rgba(245, 239, 227, .8);
+  margin-top: 3px;
 }
 .tabs {
   display: flex; gap: 2px; padding: 4px;
