@@ -199,6 +199,7 @@ body[data-view="research"] .chip { opacity: 0; }
 /* ---------- research ---------- */
 .research-bg {
   position: fixed; inset: -24px;
+  pointer-events: none;
   background: url("images/anemones.jpg") center / cover no-repeat;
   filter: blur(5px) brightness(.38) saturate(.9);
   opacity: 0;
