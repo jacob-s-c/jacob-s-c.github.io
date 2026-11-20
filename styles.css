@@ -127,6 +127,16 @@ body[data-view="research"] .scene { opacity: 0; transform: scale(1.03); pointer-
 #pool.has-lift .glint, #pool.has-lift .sparkles { opacity: 0; }
 #pool.debug .hit { stroke: #ff0; stroke-width: 2; vector-effect: non-scaling-stroke; }
 
+.caption {
+  position: absolute; z-index: 2;
+  right: clamp(16px, 4vw, 40px); bottom: calc(14px + env(safe-area-inset-bottom));
+  margin: 0;
+  font-size: 12px; letter-spacing: .02em;
+  color: rgba(245, 239, 227, .7);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, .6);
+  pointer-events: none;
+}
+
 /* ---------- card ---------- */
 .card {
   position: absolute; top: 0; left: 0; z-index: 5;
