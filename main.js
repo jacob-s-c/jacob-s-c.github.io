@@ -74,7 +74,8 @@
     const { cx, cy, d, box } = shapeOf(data);
     const back = `translate(${-cx},${-cy})`;
 
-    const mask = el('mask', { id: `m-${key}`, maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: PHOTO.w, height: PHOTO.h }, defs);
+    const pad = 40; // room for the feathered edge; keeping the mask small keeps the lift fast
+    const mask = el('mask', { id: `m-${key}`, maskUnits: 'userSpaceOnUse', x: box[0] - pad, y: box[1] - pad, width: box[2] - box[0] + pad * 2, height: box[3] - box[1] + pad * 2 }, defs);
     el('path', { d, fill: '#fff', filter: 'url(#feather)' }, mask);
 
     const g = el('g', { class: 'spot', tabindex: 0, role: 'button', 'aria-controls': 'card', 'aria-label': `${data.name}: ${article.querySelector('h2')?.textContent || ''}` }, spotsLayer);
@@ -236,56 +237,60 @@
     const canvas = $('water');
     const gl = canvas && canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true });
     if (!gl) return;
-    const MAX = 10;
+    const MAX = 10, LIFE = 3.8;
     const VS = 'attribute vec2 a; void main() { gl_Position = vec4(a, 0.0, 1.0); }';
+    // Each ripple is a short train of rings. Slopes and curvature are computed
+    // directly from the ring formula (no extra samples), and pixels that no ring
+    // is near are skipped, so this stays cheap.
     const FS = `
       precision highp float;
       uniform sampler2D img;
       uniform vec2 res, photo;
       uniform float dpr, rot, time;
       uniform vec3 view;
-      uniform vec4 rip[${MAX}];          // x, y (photo px), start time, strength
-      const float SPEED = 210.0;         // photo px per second
-      const float LAMBDA = 34.0;         // ring spacing, photo px
-      const float LIFE = 5.5;
-      float height(vec2 p) {
-        float k = 6.2831853 / LAMBDA, h = 0.0;
-        for (int i = 0; i < ${MAX}; i++) {
-          vec4 r = rip[i];
-          float age = time - r.z;
-          if (r.w <= 0.0 || age < 0.0 || age > LIFE) continue;
-          float dist = length(p - r.xy);
-          float d = dist - age * SPEED;                    // distance behind the wave front
-          float q = (d + LAMBDA * 1.2) / (LAMBDA * 1.25);
-          float train = exp(-q * q);
-          float fade = exp(-age * 0.55) * smoothstep(0.0, 0.3, age);
-          h += 2.1 * r.w * train * fade * sin(k * d) / sqrt(1.0 + dist / 150.0);
-        }
-        // faint wind ripples so the surface is never perfectly still
-        h += 0.10 * sin(dot(p, vec2(0.031, 0.017)) + time * 1.4)
-           + 0.08 * sin(dot(p, vec2(-0.019, 0.034)) + time * 1.1)
-           + 0.05 * sin(dot(p, vec2(0.052, -0.028)) + time * 2.1);
-        return h;
-      }
+      uniform int count;
+      uniform vec4 rip[${MAX}];            // x, y (photo px), start time, strength
+      const float SPEED = 210.0;           // photo px per second
+      const float LAMBDA = 34.0;           // ring spacing, photo px
+      const float K = 6.2831853 / LAMBDA;
+      const float LAG = LAMBDA * 1.2, SPREAD = LAMBDA * 1.25;
+      const float LIFE = ${LIFE.toFixed(2)}, FADE = 0.85, FALLOFF = 110.0;
       void main() {
         vec2 css = vec2(gl_FragCoord.x, res.y - gl_FragCoord.y) / dpr;
         vec2 w = view.xy + css / view.z;
         vec2 p = rot > 0.5 ? vec2(w.y, photo.y - w.x) : w;
-        float e = 2.0;
-        float c = height(p);
-        float hx1 = height(p + vec2(e, 0.0)), hx0 = height(p - vec2(e, 0.0));
-        float hy1 = height(p + vec2(0.0, e)), hy0 = height(p - vec2(0.0, e));
-        vec2 g = vec2(hx1 - hx0, hy1 - hy0) / (2.0 * e);
-        float lap = (hx1 + hx0 + hy1 + hy0 - 4.0 * c) / (e * e);
-        vec2 uv = (p - g * 24.0) / photo;                  // refraction
+        vec2 g = vec2(0.0);                // surface slope
+        float lap = 0.0;                   // surface curvature
+        for (int i = 0; i < ${MAX}; i++) {
+          if (i >= count) break;
+          vec4 r = rip[i];
+          float age = time - r.z;
+          if (age < 0.0 || age > LIFE) continue;
+          vec2 v = p - r.xy;
+          float dist = length(v);
+          float d = dist - age * SPEED;    // distance behind the wave front
+          float u = (d + LAG) / SPREAD;
+          if (abs(u) > 3.0) continue;      // no ring here
+          float amp = 2.1 * r.w * exp(-age * FADE) * smoothstep(0.0, 0.3, age) / sqrt(1.0 + dist / FALLOFF);
+          float tr = exp(-u * u), tr1 = -2.0 * u / SPREAD * tr, tr2 = (4.0 * u * u - 2.0) / (SPREAD * SPREAD) * tr;
+          float sn = sin(K * d), cs = cos(K * d);
+          float f1 = amp * (tr1 * sn + tr * K * cs);
+          float f2 = amp * (tr2 * sn + 2.0 * tr1 * K * cs - tr * K * K * sn);
+          float rr = max(dist, 1.0);
+          g += f1 * v / rr;
+          lap += f2 + f1 / rr;
+        }
+        vec2 uv = (p - g * 24.0) / photo;  // refraction
         if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) { gl_FragColor = vec4(0.0); return; }
         vec3 col = texture2D(img, uv).rgb;
-        vec3 n = normalize(vec3(-g * 2.4, 1.0));
-        vec3 L = normalize(vec3(0.55, -0.3, 1.0));          // sun from the right, as in the photo
-        col *= 1.0 + 0.55 * (dot(n, L) / L.z - 1.0);       // slopes facing the sun are brighter
-        col *= 1.0 + clamp(-lap * 9.0, -0.15, 0.35);        // caustics
-        float spec = pow(max(dot(n, normalize(L + vec3(0.0, 0.0, 1.0))), 0.0), 180.0);
-        col += vec3(1.0, 0.98, 0.92) * spec * 0.45;
+        if (count > 0) {
+          vec3 n = normalize(vec3(-g * 2.4, 1.0));
+          vec3 L = normalize(vec3(0.55, -0.3, 1.0));          // sun from the right, as in the photo
+          col *= 1.0 + 0.55 * (dot(n, L) / L.z - 1.0);       // slopes facing the sun are brighter
+          col *= 1.0 + clamp(-lap * 9.0, -0.15, 0.35);        // caustics
+          float spec = pow(max(dot(n, normalize(L + vec3(0.0, 0.0, 1.0))), 0.0), 180.0);
+          col += vec3(1.0, 0.98, 0.92) * spec * 0.45;
+        }
         gl_FragColor = vec4(col, 1.0);
       }`;
     const sh = (type, src) => {
@@ -307,7 +312,7 @@
     gl.enableVertexAttribArray(aLoc);
     gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
     const U = {};
-    for (const n of ['res', 'photo', 'dpr', 'rot', 'time', 'view', 'rip']) U[n] = gl.getUniformLocation(prog, n);
+    for (const n of ['res', 'photo', 'dpr', 'rot', 'time', 'view', 'rip', 'count']) U[n] = gl.getUniformLocation(prog, n);
 
     const ripples = [];
     const t0 = performance.now();
@@ -336,23 +341,27 @@
     img.src = PHOTO.src;
 
     const buf = new Float32Array(MAX * 4);
-    let shown = false;
+    let shown = false, wasActive = true;
     function frame() {
       requestAnimationFrame(frame);
       if (document.hidden || document.body.dataset.view !== 'about') return;
-      render();
-    }
-    function render() {
       const t = now();
       if (!svg.classList.contains('has-lift')) {
         for (const s of spots) {
           if (t < s.nextRipple) continue;
           const a = Math.random() * Math.PI * 2, j = Math.random() * s.r * 0.25;
           drop(s.cx + Math.cos(a) * j, s.cy + Math.sin(a) * j, 0.8 + Math.random() * 0.4);
-          s.nextRipple = t + 4.5 + Math.random() * 2.5;
+          s.nextRipple = t + 7 + Math.random() * 3.5;
         }
       }
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      while (ripples.length && t - ripples[0].t > LIFE) ripples.shift();
+      // only draw while rings are moving (plus one clean frame after the last fades)
+      if (ripples.length || wasActive) render();
+      wasActive = ripples.length > 0;
+    }
+    function render() {
+      const t = now();
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
       const cw = Math.round(W * dpr), ch = Math.round(H * dpr);
       if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
       gl.viewport(0, 0, cw, ch);
@@ -364,6 +373,7 @@
       gl.uniform1f(U.rot, view.rotate ? 1 : 0);
       gl.uniform1f(U.time, t);
       gl.uniform3f(U.view, view.x0, view.y0, view.scale);
+      gl.uniform1i(U.count, ripples.length);
       gl.uniform4fv(U.rip, buf);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       if (!shown) { shown = true; svg.classList.add('gl'); }

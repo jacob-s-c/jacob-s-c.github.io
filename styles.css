@@ -92,16 +92,19 @@ body[data-view="research"] .scene { opacity: 0; transform: scale(1.03); pointer-
 .spot .hit { pointer-events: all; fill: transparent; }
 .spot:focus-visible .hit { stroke: var(--paper); stroke-width: 2; stroke-dasharray: 6 6; vector-effect: non-scaling-stroke; }
 
+/* lifting is a little springy; dropping back is quick so moving between
+   anemones doesn't leave the last one hanging */
 .spot .lift {
   opacity: 0;
-  transition: transform .5s cubic-bezier(.2, .9, .25, 1.15), opacity 0s linear .5s;
+  transition: transform .18s ease-in, opacity 0s linear .18s;
 }
 .spot.lifted .lift {
   opacity: 1;
   transform: scale(1.14);
-  transition: transform .55s cubic-bezier(.2, .9, .25, 1.15), opacity 0s;
+  transition: transform .45s cubic-bezier(.2, .9, .25, 1.15), opacity 0s;
 }
-.spot .shadow { opacity: 0; transition: opacity .35s, transform .5s var(--ease-out); }
+.spot .shadow { opacity: 0; transition: opacity .15s, transform .18s ease-in; }
+.spot.lifted .shadow { transition: opacity .3s, transform .45s var(--ease-out); }
 .spot.lifted .shadow { opacity: .7; transform: translate(var(--sx), var(--sy)) scale(1.1); }
 
 /* glisten: light sweeping across each creature + twinkling sparkles */
