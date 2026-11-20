@@ -21,7 +21,6 @@
 
   const NS = 'http://www.w3.org/2000/svg';
   const $ = (id) => document.getElementById(id);
-  const noHover = matchMedia('(hover: none)').matches;
   const scene = $('scene'), svg = $('pool'), world = $('world'), spotsLayer = $('spots'), defs = $('poolDefs');
   const card = $('card');
 
@@ -98,15 +97,6 @@
     spots.push({ key, data, article, index, g, hit, box });
   });
 
-  const dots = $('foundDots');
-  for (const s of spots) {
-    const i = document.createElement('i');
-    i.style.setProperty('--c', s.data.accent);
-    dots.appendChild(i);
-    s.dot = i;
-  }
-  $('foundText').textContent = `0 of ${spots.length} found`;
-
   /* ---------- layout ----------
      Rotate the photo when its orientation doesn't match the screen, scale it to
      cover the screen, and pan so the hotspots sit in the middle of the view. */
@@ -139,14 +129,13 @@
     const x0 = vw >= cw ? (cw - vw) / 2 : clamp(fx - vw / 2, 0, cw - vw);
     const y0 = vh >= ch ? ch / 2 - (vh + hh) / 2 : clamp(fy - (vh + hh) / 2, 0, ch - vh);
     svg.setAttribute('viewBox', `${r1(x0)} ${r1(y0)} ${r1(vw)} ${r1(vh)}`);
-    const k = (W <= 640 ? 11 : 15) / (10 * scale); // sparkle radius in screen px
+    const k = (W <= 640 ? 6.5 : 8.5) / (10 * scale); // sparkle radius in screen px
     svg.querySelectorAll('.spark-size').forEach((g) => g.setAttribute('transform', `scale(${k.toFixed(3)})`));
     if (current) placeCard(current);
   }
 
   /* ---------- card ---------- */
   let current = null, pinned = false, closeTimer = 0;
-  const found = new Set();
 
   function placeCard(s) {
     const r = s.hit.getBoundingClientRect(), ex = r.width * 0.08, ey = r.height * 0.08; // room for the lift
@@ -191,15 +180,6 @@
     card.querySelector('.card-body').innerHTML = s.article.innerHTML;
     placeCard(s);
     card.classList.add('open');
-
-    if (!found.has(s.key)) {
-      found.add(s.key);
-      s.g.classList.add('found');
-      s.dot.classList.add('on');
-      const n = found.size, total = spots.length;
-      $('foundText').textContent = n === total ? 'You met everyone. Thanks for visiting!' : `${n} of ${total} found`;
-      $('hint').style.opacity = '0';
-    }
   }
 
   function close() {
@@ -253,7 +233,6 @@
   window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 100); });
   window.addEventListener('hashchange', setView);
 
-  if (noHover) $('hint').textContent = 'Tap an anemone to say hello';
   const params = new URLSearchParams(location.search);
   if (params.has('debug')) svg.classList.add('debug');
   layout();

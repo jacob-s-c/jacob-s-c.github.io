@@ -15,7 +15,7 @@ html, body { height: 100%; margin: 0; }
 body {
   background: #2a2622;
   color: var(--paper);
-  font-family: "Source Sans 3", system-ui, -apple-system, sans-serif;
+  font-family: "Fraunces", Georgia, serif;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
@@ -41,8 +41,7 @@ a { color: inherit; }
   display: flex; flex-direction: column; line-height: 1.15;
 }
 .tagline {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-weight: 400; font-size: 11.5px; letter-spacing: .03em;
+  font-weight: 400; font-size: 13.5px; letter-spacing: .01em;
   color: rgba(245, 239, 227, .8);
   margin-top: 3px;
 }
@@ -130,40 +129,6 @@ body[data-view="research"] .scene { opacity: 0; transform: scale(1.03); pointer-
 #pool.has-lift .glint, #pool.has-lift .sparkles { opacity: 0; }
 #pool.debug .hit { stroke: #ff0; stroke-width: 2; vector-effect: non-scaling-stroke; }
 
-/* ---------- chips ---------- */
-.chip {
-  position: absolute; left: 50%;
-  transform: translateX(-50%);
-  margin: 0;
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: rgba(14, 24, 28, .5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: inset 0 0 0 1px rgba(245, 239, 227, .12);
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 12px; letter-spacing: .04em;
-  color: rgba(245, 239, 227, .9);
-  white-space: nowrap;
-  pointer-events: none;
-  transition: opacity .5s;
-}
-.hint { top: calc(var(--header-h) + 2px); }
-@media (max-width: 640px) { .hint { top: auto; bottom: calc(58px + env(safe-area-inset-bottom)); } }
-@media (min-width: 641px) { .found { left: clamp(16px, 4vw, 40px); transform: none; } }
-.found {
-  bottom: calc(16px + env(safe-area-inset-bottom));
-  display: flex; align-items: center; gap: 10px;
-}
-.found-dots { display: flex; gap: 5px; }
-.found-dots i {
-  width: 8px; height: 8px; border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px rgba(245, 239, 227, .55);
-  transition: background .4s, box-shadow .4s;
-}
-.found-dots i.on { background: var(--c); box-shadow: inset 0 0 0 1.5px var(--paper); }
-body[data-view="research"] .chip { opacity: 0; }
-
 /* ---------- card ---------- */
 .card {
   position: absolute; top: 0; left: 0; z-index: 5;
@@ -188,8 +153,7 @@ body[data-view="research"] .chip { opacity: 0; }
   display: flex; justify-content: space-between; gap: 12px;
   padding-bottom: 9px; margin-bottom: 11px;
   border-bottom: 1px dashed var(--paper-edge);
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px; letter-spacing: .05em;
+  font-size: 12.5px; letter-spacing: .02em;
   color: var(--muted);
 }
 .card-sci { font-style: italic; text-align: right; }
