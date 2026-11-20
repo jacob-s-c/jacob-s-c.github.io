@@ -34,16 +34,11 @@ a { color: inherit; }
 .name {
   font-family: "Fraunces", Georgia, serif;
   font-weight: 600;
-  font-size: clamp(19px, 2.2vw, 23px);
-  letter-spacing: -.01em;
+  font-size: clamp(23px, 2.7vw, 29px);
+  letter-spacing: -.005em;
+  word-spacing: .12em;
   text-decoration: none;
   text-shadow: 0 1px 8px rgba(0, 0, 0, .45);
-  display: flex; flex-direction: column; line-height: 1.15;
-}
-.tagline {
-  font-weight: 400; font-size: 13.5px; letter-spacing: .01em;
-  color: rgba(245, 239, 227, .8);
-  margin-top: 3px;
 }
 .tabs {
   display: flex; gap: 2px; padding: 4px;
