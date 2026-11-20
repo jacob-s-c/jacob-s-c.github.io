@@ -130,46 +130,36 @@ body[data-view="research"] .scene { opacity: 0; transform: scale(1.03); pointer-
 /* ---------- card ---------- */
 .card {
   position: absolute; top: 0; left: 0; z-index: 5;
-  width: 310px;
-  padding: 16px 20px 18px;
-  border-radius: 14px;
-  background: var(--paper);
-  color: var(--ink);
-  box-shadow: 0 22px 44px -16px rgba(0, 0, 0, .6), 0 2px 8px rgba(0, 0, 0, .25);
-  border-top: 5px solid var(--accent, #3d9a6c);
+  width: 340px;
+  padding: 20px 22px 22px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, .9);
+  color: var(--paper);
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, .8);
   opacity: 0;
-  transform: translateY(8px) scale(.96);
+  transform: translateY(6px);
   pointer-events: none;
   visibility: hidden;
-  transition: opacity .22s, transform .32s var(--ease-out), visibility 0s .32s;
+  transition: opacity .2s, transform .28s var(--ease-out), visibility 0s .28s;
 }
 .card.open {
   opacity: 1; transform: none; pointer-events: auto; visibility: visible;
-  transition: opacity .22s, transform .32s var(--ease-out);
+  transition: opacity .2s, transform .28s var(--ease-out);
 }
-.card-meta {
-  display: flex; justify-content: space-between; gap: 12px;
-  padding-bottom: 9px; margin-bottom: 11px;
-  border-bottom: 1px dashed var(--paper-edge);
-  font-size: 12.5px; letter-spacing: .02em;
-  color: var(--muted);
-}
-.card-sci { font-style: italic; text-align: right; }
 .card h2 {
-  margin: 0 0 6px;
+  margin: 0 0 10px;
   font-family: "Inter", Arial, Helvetica, sans-serif;
-  font-weight: 600; font-size: 23px; line-height: 1.15;
+  font-weight: 600; font-size: 18px; line-height: 1.25;
   letter-spacing: -.01em;
 }
-.card p { margin: 0 0 8px; font-size: 15.5px; line-height: 1.5; }
+.card p { margin: 0 0 8px; font-size: 14px; line-height: 1.55; color: rgba(245, 239, 227, .82); }
 .card p:last-child { margin-bottom: 0; }
-.card .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.card .links { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; }
 .card .links a {
-  padding: 5px 12px; border-radius: 999px;
-  background: var(--ink); color: var(--paper);
-  font-size: 14px; font-weight: 600; text-decoration: none;
+  color: var(--paper); font-size: 13.5px; font-weight: 600;
+  text-decoration: underline; text-decoration-color: rgba(245, 239, 227, .35); text-underline-offset: 3px;
 }
-.card .links a:hover { background: var(--accent); }
+.card .links a:hover { text-decoration-color: currentColor; }
 
 @media (max-width: 640px) {
   .card {
@@ -218,8 +208,8 @@ body[data-view="research"] .research {
 }
 /* each lab: a bright rule and bold header, then a compact list.
    On wide screens the lab name sits in its own column beside its items. */
-.lab { padding-top: 18px; border-top: 1px solid rgba(245, 239, 227, .4); }
-.lab + .lab { margin-top: 56px; }
+.lab { padding-top: 0; }
+.lab + .lab { margin-top: 64px; }
 .lab h2 {
   margin: 0;
   font-size: 21px; font-weight: 700; line-height: 1.25; letter-spacing: -.01em;
@@ -229,9 +219,8 @@ body[data-view="research"] .research {
   font-size: 13px; line-height: 1.45; color: rgba(245, 239, 227, .6);
 }
 .items { list-style: none; margin: 16px 0 0; padding: 0; }
-.items li { padding: 9px 0; }
+.items li { padding: 8px 0; }
 .items li:first-child { padding-top: 0; }
-.items li + li { border-top: 1px solid rgba(245, 239, 227, .08); }
 @media (min-width: 900px) {
   .lab { display: grid; grid-template-columns: 280px 1fr; column-gap: 48px; align-items: start; }
   .lab .items { margin-top: 4px; }
@@ -257,4 +246,3 @@ body[data-view="research"] .research {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
 }
 
-.card-no { flex-shrink: 0; white-space: nowrap; }

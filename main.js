@@ -12,7 +12,7 @@
   const PHOTO = { src: 'images/canal.jpg', w: 2880, h: 2160, turn: true, zoom: false };
 
   // Hotspots. ellipse: [cx, cy, rx, ry]   poly: [[x, y], ...] (smoothed into a curve)
-  // sci is optional; the card shows it (or the common name) in the top-right corner.
+  // name is used for the screen-reader label.
   const SPOTS = {
     'left':   { name: 'Sea anemone', sci: '', accent: '#5e8f9a', ellipse: [952, 1429, 168, 146] },
     'middle': { name: 'Sea anemone', sci: '', accent: '#4f8f78', ellipse: [1428, 1359, 184, 176] },
@@ -186,10 +186,7 @@
     if (water) water.drop(s.cx, s.cy, 1.4);
     svg.classList.add('has-lift');
 
-    card.style.setProperty('--accent', s.data.accent);
-    card.querySelector('.card-no').textContent = `No. ${String(s.index + 1).padStart(2, '0')} / ${String(spots.length).padStart(2, '0')}`;
-    card.querySelector('.card-sci').textContent = s.data.sci || s.data.name;
-    card.querySelector('.card-body').innerHTML = s.article.innerHTML;
+    card.innerHTML = s.article.innerHTML;
     placeCard(s);
     card.classList.add('open');
   }
