@@ -216,28 +216,34 @@ body[data-view="research"] .research {
   font-size: clamp(34px, 5vw, 48px);
   letter-spacing: -.02em;
 }
-/* each lab: a bright rule and bold header, then a compact list */
+/* each lab: a bright rule and bold header, then a compact list.
+   On wide screens the lab name sits in its own column beside its items. */
 .lab { padding-top: 18px; border-top: 1px solid rgba(245, 239, 227, .4); }
-.lab + .lab { margin-top: 64px; }
+.lab + .lab { margin-top: 56px; }
 .lab h2 {
   margin: 0;
-  font-size: 22px; font-weight: 700; line-height: 1.25; letter-spacing: -.01em;
+  font-size: 21px; font-weight: 700; line-height: 1.25; letter-spacing: -.01em;
 }
 .lab .pi {
-  margin: 4px 0 0;
-  font-size: 14px; color: rgba(245, 239, 227, .6);
+  margin: 6px 0 0;
+  font-size: 13px; line-height: 1.45; color: rgba(245, 239, 227, .6);
 }
-.items { list-style: none; margin: 18px 0 0; padding: 0; }
-.items li { padding: 11px 0; }
-.items li + li { border-top: 1px solid rgba(245, 239, 227, .09); }
-.item-title { display: block; font-size: 13.5px; font-weight: 600; line-height: 1.4; }
+.items { list-style: none; margin: 16px 0 0; padding: 0; }
+.items li { padding: 9px 0; }
+.items li:first-child { padding-top: 0; }
+.items li + li { border-top: 1px solid rgba(245, 239, 227, .08); }
+@media (min-width: 900px) {
+  .lab { display: grid; grid-template-columns: 280px 1fr; column-gap: 48px; align-items: start; }
+  .lab .items { margin-top: 4px; }
+}
+.item-title { display: block; font-size: 12.5px; font-weight: 600; line-height: 1.4; }
 .item-title a { text-decoration: underline; text-decoration-color: rgba(245, 239, 227, .35); text-underline-offset: 3px; }
 .item-title a:hover { text-decoration-color: currentColor; }
-.item-authors { display: block; margin-top: 3px; font-size: 12px; line-height: 1.45; color: rgba(245, 239, 227, .58); }
+.item-authors { display: block; margin-top: 2px; font-size: 11px; line-height: 1.45; color: rgba(245, 239, 227, .56); }
 .item-authors .me { color: var(--paper); font-weight: 600; }
-.item-venue { display: block; margin-top: 1px; font-size: 12px; line-height: 1.45; color: rgba(245, 239, 227, .46); }
-.item-venue em { font-style: italic; color: rgba(245, 239, 227, .6); }
-.footnote { margin: 40px 0 0; font-size: 12px; color: rgba(245, 239, 227, .42); }
+.item-venue { display: block; margin-top: 1px; font-size: 11px; line-height: 1.45; color: rgba(245, 239, 227, .44); }
+.item-venue em { font-style: italic; color: rgba(245, 239, 227, .58); }
+.footnote { margin: 40px 0 0; font-size: 11px; color: rgba(245, 239, 227, .42); }
 .item-desc { display: block; margin-top: 2px; font-size: 15px; line-height: 1.45; color: rgba(245, 239, 227, .66); }
 
 /* ---------- notes (source content; shown as plain list without JS) ---------- */
