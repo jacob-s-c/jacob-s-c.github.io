@@ -226,10 +226,15 @@ body[data-view="research"] .research {
   font-size: 15px; color: rgba(245, 239, 227, .62);
 }
 .items { list-style: none; margin: 14px 0 0; padding: 0; border-top: 1px solid rgba(245, 239, 227, .14); }
-.items li { padding: 12px 0; border-bottom: 1px solid rgba(245, 239, 227, .14); }
+.items li { padding: 14px 0; border-bottom: 1px solid rgba(245, 239, 227, .14); }
 .item-title { display: block; font-size: 16.5px; font-weight: 600; }
 .item-title a { text-decoration: underline; text-decoration-color: rgba(245, 239, 227, .35); text-underline-offset: 3px; }
 .item-title a:hover { text-decoration-color: currentColor; }
+.item-authors { display: block; margin-top: 4px; font-size: 14px; line-height: 1.45; color: rgba(245, 239, 227, .62); }
+.item-authors .me { color: var(--paper); font-weight: 600; }
+.item-venue { display: block; margin-top: 2px; font-size: 14px; line-height: 1.45; color: rgba(245, 239, 227, .5); }
+.item-venue em { font-style: italic; color: rgba(245, 239, 227, .62); }
+.footnote { margin: 28px 0 0; font-size: 13px; color: rgba(245, 239, 227, .45); }
 .item-desc { display: block; margin-top: 2px; font-size: 15px; line-height: 1.45; color: rgba(245, 239, 227, .66); }
 
 /* ---------- notes (source content; shown as plain list without JS) ---------- */
