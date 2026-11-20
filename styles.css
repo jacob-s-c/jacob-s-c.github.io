@@ -224,8 +224,11 @@ body[data-view="research"] .chip { opacity: 0; }
 .research-bg {
   position: fixed; inset: -24px;
   pointer-events: none;
-  background: url("images/canal.jpg") center / cover no-repeat;
-  filter: blur(10px) brightness(.35) saturate(.9);
+  /* faded photo; on wide screens the crop keeps the horizon, waves and surfgrass */
+  background:
+    linear-gradient(rgba(12, 20, 26, .55), rgba(12, 20, 26, .3) 55%, rgba(12, 20, 26, .5)),
+    url("images/research.jpg") center 40% / cover no-repeat;
+  filter: blur(1.5px) saturate(.9);
   opacity: 0;
   transition: opacity .6s;
 }
