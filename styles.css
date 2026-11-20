@@ -65,7 +65,8 @@ a { color: inherit; }
   background: #1d2421;
   transition: opacity .6s var(--ease-out), transform .7s var(--ease-out);
 }
-#pool { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#pool, #water { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#pool.gl #photo { visibility: hidden; } /* the rippling canvas underneath shows the photo instead */
 .scene::before {
   /* blurred backdrop, only visible if the photo has to shrink to fit a hotspot */
   content: ""; position: absolute; inset: -30px;

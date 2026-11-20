@@ -19,6 +19,11 @@
     'right':  { name: 'Sea anemone', sci: '', accent: '#7c9a5e', ellipse: [1823, 1506, 186, 148] },
   };
 
+  // ?fx=glisten switches back to the light-sweep effect
+  const params = new URLSearchParams(location.search);
+  const FX = params.get('fx') === 'glisten' ? 'glisten' : 'ripple';
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const NS = 'http://www.w3.org/2000/svg';
   const $ = (id) => document.getElementById(id);
   const scene = $('scene'), svg = $('pool'), world = $('world'), spotsLayer = $('spots'), defs = $('poolDefs');
@@ -78,29 +83,32 @@
     const lift = el('g', { class: 'lift' }, at);
     el('image', { href: PHOTO.src, width: PHOTO.w, height: PHOTO.h, preserveAspectRatio: 'none' }, el('g', { transform: back, mask: `url(#m-${key})` }, lift));
 
-    // glisten: a soft band of light sweeps across the creature, plus a few twinkles
-    const bw = box[2] - box[0], bh = box[3] - box[1], band = Math.max(bw, bh) * 0.42;
-    const glint = el('g', { class: 'glint', transform: back, mask: `url(#m-${key})` }, at);
-    const sweep = el('g', { class: 'sweep', style: `--dist:${r1(bw + band * 3)}px;animation-delay:${(index * 1.4).toFixed(1)}s` }, glint);
-    el('rect', { x: r1(box[0] - band * 2), y: r1(box[1] - bh * 0.5), width: r1(band), height: r1(bh * 2), fill: 'url(#glintGrad)', transform: `rotate(18 ${r1(box[0] - band * 1.5)} ${r1(cy)})` }, sweep);
-    const rand = seeded(index * 977 + 13);
-    const sparkles = el('g', { class: 'sparkles', transform: back }, at);
-    for (let i = 0; i < 4; i++) {
-      const a = rand() * Math.PI * 2, k = Math.sqrt(rand()) * 0.34;
-      const sp = el('g', { transform: `translate(${r1(cx + Math.cos(a) * bw * k)},${r1(cy + Math.sin(a) * bh * k)})` }, sparkles);
-      const tw = el('g', { class: 'twinkle', style: `animation-delay:${(rand() * 4).toFixed(2)}s;animation-duration:${(2.4 + rand() * 1.4).toFixed(2)}s` }, el('g', { class: 'spark-size' }, sp));
-      el('circle', { r: 4.5, class: 'spark-glow', filter: 'url(#sparkGlow)' }, tw);
-      el('path', { d: 'M0,-10C1,-2 2,-1 10,0C2,1 1,2 0,10C-1,2 -2,1 -10,0C-2,-1 -1,-2 0,-10Z', class: 'spark' }, tw);
+    // glisten (?fx=glisten): a soft band of light sweeps across the creature, plus a few twinkles
+    if (FX === 'glisten') {
+      const bw = box[2] - box[0], bh = box[3] - box[1], band = Math.max(bw, bh) * 0.42;
+      const glint = el('g', { class: 'glint', transform: back, mask: `url(#m-${key})` }, at);
+      const sweep = el('g', { class: 'sweep', style: `--dist:${r1(bw + band * 3)}px;animation-delay:${(index * 1.4).toFixed(1)}s` }, glint);
+      el('rect', { x: r1(box[0] - band * 2), y: r1(box[1] - bh * 0.5), width: r1(band), height: r1(bh * 2), fill: 'url(#glintGrad)', transform: `rotate(18 ${r1(box[0] - band * 1.5)} ${r1(cy)})` }, sweep);
+      const rand = seeded(index * 977 + 13);
+      const sparkles = el('g', { class: 'sparkles', transform: back }, at);
+      for (let i = 0; i < 4; i++) {
+        const a = rand() * Math.PI * 2, k = Math.sqrt(rand()) * 0.34;
+        const sp = el('g', { transform: `translate(${r1(cx + Math.cos(a) * bw * k)},${r1(cy + Math.sin(a) * bh * k)})` }, sparkles);
+        const tw = el('g', { class: 'twinkle', style: `animation-delay:${(rand() * 4).toFixed(2)}s;animation-duration:${(2.4 + rand() * 1.4).toFixed(2)}s` }, el('g', { class: 'spark-size' }, sp));
+        el('circle', { r: 4.5, class: 'spark-glow', filter: 'url(#sparkGlow)' }, tw);
+        el('path', { d: 'M0,-10C1,-2 2,-1 10,0C2,1 1,2 0,10C-1,2 -2,1 -10,0C-2,-1 -1,-2 0,-10Z', class: 'spark' }, tw);
+      }
     }
     const hit = el('path', { d, class: 'hit' }, g);
 
-    spots.push({ key, data, article, index, g, hit, box });
+    spots.push({ key, data, article, index, g, hit, box, cx, cy, r: Math.max(box[2] - box[0], box[3] - box[1]) / 2 });
   });
 
   /* ---------- layout ----------
      Rotate the photo when its orientation doesn't match the screen, scale it to
      cover the screen, and pan so the hotspots sit in the middle of the view. */
   let W = 0, H = 0;
+  const view = { x0: 0, y0: 0, scale: 1, rotate: false };
   const headerH = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 72;
   const allBox = spots.reduce((b, s) => [Math.min(b[0], s.box[0]), Math.min(b[1], s.box[1]), Math.max(b[2], s.box[2]), Math.max(b[3], s.box[3])], [Infinity, Infinity, -Infinity, -Infinity]);
   function layout() {
@@ -129,6 +137,8 @@
     const x0 = vw >= cw ? (cw - vw) / 2 : clamp(fx - vw / 2, 0, cw - vw);
     const y0 = vh >= ch ? ch / 2 - (vh + hh) / 2 : clamp(fy - (vh + hh) / 2, 0, ch - vh);
     svg.setAttribute('viewBox', `${r1(x0)} ${r1(y0)} ${r1(vw)} ${r1(vh)}`);
+    Object.assign(view, { x0, y0, scale, rotate });
+    if (water) water.render();
     const k = (W <= 640 ? 6.5 : 8.5) / (10 * scale); // sparkle radius in screen px
     svg.querySelectorAll('.spark-size').forEach((g) => g.setAttribute('transform', `scale(${k.toFixed(3)})`));
     if (current) placeCard(current);
@@ -172,6 +182,7 @@
     if (current) current.g.classList.remove('lifted');
     current = s;
     requestAnimationFrame(() => s.g.classList.add('lifted'));
+    if (water) water.drop(s.cx, s.cy, 1.4);
     svg.classList.add('has-lift');
 
     card.style.setProperty('--accent', s.data.accent);
@@ -215,6 +226,151 @@
   scene.addEventListener('click', close);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 
+  /* ---------- water ----------
+     The photo is drawn into a WebGL canvas under the SVG. Rings spread out from
+     each anemone and bend the photo like real water: refraction, a little shading
+     on each slope, caustic light where the surface focuses it, and a glint on the
+     crests. If WebGL or the image isn't available the plain SVG photo stays. */
+  let water = null;
+  function startWater() {
+    const canvas = $('water');
+    const gl = canvas && canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true });
+    if (!gl) return;
+    const MAX = 10;
+    const VS = 'attribute vec2 a; void main() { gl_Position = vec4(a, 0.0, 1.0); }';
+    const FS = `
+      precision highp float;
+      uniform sampler2D img;
+      uniform vec2 res, photo;
+      uniform float dpr, rot, time;
+      uniform vec3 view;
+      uniform vec4 rip[${MAX}];          // x, y (photo px), start time, strength
+      const float SPEED = 210.0;         // photo px per second
+      const float LAMBDA = 34.0;         // ring spacing, photo px
+      const float LIFE = 5.5;
+      float height(vec2 p) {
+        float k = 6.2831853 / LAMBDA, h = 0.0;
+        for (int i = 0; i < ${MAX}; i++) {
+          vec4 r = rip[i];
+          float age = time - r.z;
+          if (r.w <= 0.0 || age < 0.0 || age > LIFE) continue;
+          float dist = length(p - r.xy);
+          float d = dist - age * SPEED;                    // distance behind the wave front
+          float q = (d + LAMBDA * 1.2) / (LAMBDA * 1.25);
+          float train = exp(-q * q);
+          float fade = exp(-age * 0.55) * smoothstep(0.0, 0.3, age);
+          h += 2.1 * r.w * train * fade * sin(k * d) / sqrt(1.0 + dist / 150.0);
+        }
+        // faint wind ripples so the surface is never perfectly still
+        h += 0.10 * sin(dot(p, vec2(0.031, 0.017)) + time * 1.4)
+           + 0.08 * sin(dot(p, vec2(-0.019, 0.034)) + time * 1.1)
+           + 0.05 * sin(dot(p, vec2(0.052, -0.028)) + time * 2.1);
+        return h;
+      }
+      void main() {
+        vec2 css = vec2(gl_FragCoord.x, res.y - gl_FragCoord.y) / dpr;
+        vec2 w = view.xy + css / view.z;
+        vec2 p = rot > 0.5 ? vec2(w.y, photo.y - w.x) : w;
+        float e = 2.0;
+        float c = height(p);
+        float hx1 = height(p + vec2(e, 0.0)), hx0 = height(p - vec2(e, 0.0));
+        float hy1 = height(p + vec2(0.0, e)), hy0 = height(p - vec2(0.0, e));
+        vec2 g = vec2(hx1 - hx0, hy1 - hy0) / (2.0 * e);
+        float lap = (hx1 + hx0 + hy1 + hy0 - 4.0 * c) / (e * e);
+        vec2 uv = (p - g * 24.0) / photo;                  // refraction
+        if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) { gl_FragColor = vec4(0.0); return; }
+        vec3 col = texture2D(img, uv).rgb;
+        vec3 n = normalize(vec3(-g * 2.4, 1.0));
+        vec3 L = normalize(vec3(0.55, -0.3, 1.0));          // sun from the right, as in the photo
+        col *= 1.0 + 0.55 * (dot(n, L) / L.z - 1.0);       // slopes facing the sun are brighter
+        col *= 1.0 + clamp(-lap * 9.0, -0.15, 0.35);        // caustics
+        float spec = pow(max(dot(n, normalize(L + vec3(0.0, 0.0, 1.0))), 0.0), 180.0);
+        col += vec3(1.0, 0.98, 0.92) * spec * 0.45;
+        gl_FragColor = vec4(col, 1.0);
+      }`;
+    const sh = (type, src) => {
+      const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o);
+      if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o));
+      return o;
+    };
+    const prog = gl.createProgram();
+    try {
+      gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS));
+      gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+    } catch (err) { console.warn('water:', err); return; }
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const aLoc = gl.getAttribLocation(prog, 'a');
+    gl.enableVertexAttribArray(aLoc);
+    gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+    const U = {};
+    for (const n of ['res', 'photo', 'dpr', 'rot', 'time', 'view', 'rip']) U[n] = gl.getUniformLocation(prog, n);
+
+    const ripples = [];
+    const t0 = performance.now();
+    // ?t=<seconds> freezes the water at that moment (for screenshots)
+    const freeze = params.has('t') ? parseFloat(params.get('t')) || 0 : null;
+    const now = () => freeze ?? (performance.now() - t0) / 1000;
+    const drop = (x, y, strength = 1) => {
+      ripples.push({ x, y, t: now(), w: strength });
+      if (ripples.length > MAX) ripples.shift();
+    };
+    // each anemone sends out a ring every few seconds, staggered
+    for (const s of spots) s.nextRipple = 0.5 + s.index * 1.7;
+    if (freeze !== null) for (const s of spots) { drop(s.cx, s.cy, 1); ripples[ripples.length - 1].t = freeze - (params.has('age') ? parseFloat(params.get('age')) : 0.7 + s.index * 0.9); s.nextRipple = Infinity; }
+
+    const img = new Image();
+    img.onload = () => {
+      gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+      for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+      try {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+      } catch (err) { console.warn('water: photo unavailable to WebGL (open the site through a web server)', err); return; }
+      water = { drop, render };
+      render();
+      requestAnimationFrame(frame);
+    };
+    img.src = PHOTO.src;
+
+    const buf = new Float32Array(MAX * 4);
+    let shown = false;
+    function frame() {
+      requestAnimationFrame(frame);
+      if (document.hidden || document.body.dataset.view !== 'about') return;
+      render();
+    }
+    function render() {
+      const t = now();
+      if (!svg.classList.contains('has-lift')) {
+        for (const s of spots) {
+          if (t < s.nextRipple) continue;
+          const a = Math.random() * Math.PI * 2, j = Math.random() * s.r * 0.25;
+          drop(s.cx + Math.cos(a) * j, s.cy + Math.sin(a) * j, 0.8 + Math.random() * 0.4);
+          s.nextRipple = t + 4.5 + Math.random() * 2.5;
+        }
+      }
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const cw = Math.round(W * dpr), ch = Math.round(H * dpr);
+      if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
+      gl.viewport(0, 0, cw, ch);
+      buf.fill(0);
+      ripples.forEach((r, i) => buf.set([r.x, r.y, r.t, r.w], i * 4));
+      gl.uniform2f(U.res, cw, ch);
+      gl.uniform2f(U.photo, PHOTO.w, PHOTO.h);
+      gl.uniform1f(U.dpr, dpr);
+      gl.uniform1f(U.rot, view.rotate ? 1 : 0);
+      gl.uniform1f(U.time, t);
+      gl.uniform3f(U.view, view.x0, view.y0, view.scale);
+      gl.uniform4fv(U.rip, buf);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      if (!shown) { shown = true; svg.classList.add('gl'); }
+    }
+    canvas.addEventListener('webglcontextlost', () => { svg.classList.remove('gl'); water = null; });
+  }
+
   /* ---------- views ---------- */
   function setView() {
     const view = location.hash === '#research' ? 'research' : 'about';
@@ -230,13 +386,14 @@
   }
 
   let rt = 0;
-  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 100); });
+  if (window.ResizeObserver) new ResizeObserver(() => layout()).observe(scene);
+  else window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(layout, 100); });
   window.addEventListener('hashchange', setView);
 
-  const params = new URLSearchParams(location.search);
   if (params.has('debug')) svg.classList.add('debug');
   layout();
   setView();
+  if (FX === 'ripple' && !reduceMotion) startWater();
 
   // ?peek=<creature> opens that note on load (handy for previews)
   const peek = spots.find((s) => s.key === params.get('peek'));

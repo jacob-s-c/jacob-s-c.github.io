@@ -10,3 +10,4 @@ Static site, no build step. Open `index.html` in a browser to preview.
 - **Styles**: `styles.css`.
 
 Hosted on Vercel; every push to `main` redeploys.
+- Water effect: realistic ripples rendered with WebGL (`startWater` in `main.js`). Add `?fx=glisten` to the URL for the earlier light-sweep effect. WebGL can't read the photo from a `file://` page, so preview through a local server (`python3 -m http.server`) to see the ripples; without one the photo just shows still.
