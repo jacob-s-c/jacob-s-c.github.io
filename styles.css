@@ -15,7 +15,7 @@ html, body { height: 100%; margin: 0; }
 body {
   background: #2a2622;
   color: var(--paper);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", Arial, Helvetica, sans-serif;
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
@@ -32,7 +32,7 @@ a { color: inherit; }
   background: linear-gradient(rgba(20, 17, 15, .6), rgba(20, 17, 15, 0));
 }
 .name {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", Arial, Helvetica, sans-serif;
   font-weight: 600;
   font-size: clamp(23px, 2.7vw, 29px);
   letter-spacing: -.005em;
@@ -153,7 +153,7 @@ body[data-view="research"] .scene { opacity: 0; transform: scale(1.03); pointer-
 .card-sci { font-style: italic; text-align: right; }
 .card h2 {
   margin: 0 0 6px;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", Arial, Helvetica, sans-serif;
   font-weight: 600; font-size: 23px; line-height: 1.15;
   letter-spacing: -.01em;
 }
@@ -207,7 +207,7 @@ body[data-view="research"] .research {
 .research-inner { max-width: 720px; margin: 0 auto; }
 .research h1 {
   margin: 0 0 36px;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", Arial, Helvetica, sans-serif;
   font-weight: 600;
   font-size: clamp(34px, 5vw, 48px);
   letter-spacing: -.02em;
